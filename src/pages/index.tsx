@@ -22,9 +22,15 @@ const Home: NextPage = () => {
     },
   ]);
 
-  if (firstPokemon.isLoading || secondPokemon.isLoading) return null;
+  const voteMutation = trpc.useMutation(["cast-vote"]);
 
   const voteForRounder = (selected: number) => {
+    if (selected === first) {
+      voteMutation.mutate({ votedFor: first, votedAgainst: second });
+    } else {
+      voteMutation.mutate({ votedFor: second, votedAgainst: first });
+    }
+
     updateIds(getOptionsForVote());
   };
 
