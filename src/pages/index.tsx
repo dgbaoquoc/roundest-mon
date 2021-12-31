@@ -1,3 +1,4 @@
+import { trpc } from "@/utils/trpc";
 import type { NextPage } from "next";
 
 const Home: NextPage = () => {
