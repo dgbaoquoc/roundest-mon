@@ -30,7 +30,7 @@ const Home: NextPage = () => {
       <div className="border rounded p-8 flex justify-between items-center max-w-2xl">
         <div className="w-64 h-64">
           <img
-            src={firstPokemon.data?.sprites.front_default}
+            src={firstPokemon.data?.sprites.front_default || undefined}
             className="w-full"
           />
           <div className="text-xl text-center capitalize mt-[-2rem]">
@@ -40,7 +40,7 @@ const Home: NextPage = () => {
         <div className="p-8">VS</div>
         <div className="w-64 h-64">
           <img
-            src={secondPokemon.data?.sprites.front_default}
+            src={secondPokemon.data?.sprites.front_default || undefined}
             className="w-full"
           />
           <div className="text-xl text-center capitalize mt-[-2rem]">
