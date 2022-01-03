@@ -3,6 +3,7 @@ import { trpc } from "@/utils/trpc";
 import type { NextPage } from "next";
 import { useState } from "react";
 import { inferQueryResponse } from "./api/trpc/[trpc]";
+import Image from "next/image";
 
 const Home: NextPage = () => {
   const [ids, updateIds] = useState(getOptionsForVote());
@@ -70,9 +71,12 @@ const PokemonListing: React.FC<{
 }> = (props) => {
   return (
     <div className="flex flex-col items-center">
-      <img
-        src={props.pokemon.sprites.front_default || undefined}
+      <Image
+        src={props.pokemon.sprites.front_default}
+        width={256}
+        height={256}
         className="w-64 h-64"
+        layout="fixed"
       />
       <div className="text-xl text-center capitalize mt-[-2rem]">
         {props.pokemon.name}
