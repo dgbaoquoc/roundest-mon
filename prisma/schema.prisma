@@ -17,6 +17,18 @@ model Vote {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  votedFor     Int
-  votedAgainst Int
+  votedFor       Pokemon @relation(name: "votedFor", fields: [votedForId], references: [id])
+  votedForId     Int
+  votedAgainst   Pokemon @relation(name: "votedAgainst", fields: [votedAgainstId], references: [id])
+  votedAgainstId Int
+}
+
+model Pokemon {
+  id Int @id
+
+  name      String
+  spriteUrl String
+
+  VoteFor     Vote[] @relation("votedFor")
+  VoteAgainst Vote[] @relation("votedAgainst")
 }
