@@ -58,6 +58,9 @@ const Home: NextPage = () => {
             </>
           )}
       </div>
+      <div className="absolute bottom-5 w-full text-xl text-center">
+        <a href="https://github.com/dgbaoquoc/roundest-mon">Github</a>
+      </div>
     </div>
   );
 };
