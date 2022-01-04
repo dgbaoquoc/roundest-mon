@@ -5,6 +5,7 @@ import { useState } from "react";
 import { inferQueryResponse } from "./api/trpc/[trpc]";
 import Image from "next/image";
 import Link from "next/link";
+import Head from "next/head";
 
 const Home: NextPage = () => {
   const [ids, updateIds] = useState(getOptionsForVote());
@@ -36,34 +37,41 @@ const Home: NextPage = () => {
     updateIds(getOptionsForVote());
   };
 
+  const dataLoaded =
+    !firstPokemon.isLoading &&
+    firstPokemon.data &&
+    !secondPokemon.isLoading &&
+    secondPokemon.data;
+
   return (
-    <div className="h-screen w-screen flex flex-col justify-center items-center">
-      <div className="text-2xl text-center pt-8">Which Pokemon is rounder?</div>
+    <div className="h-screen w-screen flex flex-col justify-between items-center relative">
+      <Head>
+        <title>Roundest Pokemon</title>
+      </Head>
+      <div className="text-2xl text-center pt-8">Which Pokemon is Rounder?</div>
       <div className="p-2" />
-      <div className="border rounded p-8 flex justify-between items-center max-w-2xl">
-        {!firstPokemon.isLoading &&
-          firstPokemon.data &&
-          !secondPokemon.isLoading &&
-          secondPokemon.data && (
-            <>
-              <PokemonListing
-                pokemon={firstPokemon.data}
-                vote={() => voteForRounder(first)}
-              />
-              <div className="p-8 italic text-xl">{"or"}</div>
-              <PokemonListing
-                pokemon={secondPokemon.data}
-                vote={() => voteForRounder(second)}
-              />
-              <div className="p-2"></div>
-            </>
-          )}
+      <div className="p-8 flex justify-between items-center max-w-2xl flex-col md:flex-row animate-fade-in">
+        {dataLoaded && (
+          <>
+            <PokemonListing
+              pokemon={firstPokemon.data}
+              vote={() => voteForRounder(first)}
+            />
+            <div className="p-8 italic text-xl">{"or"}</div>
+            <PokemonListing
+              pokemon={secondPokemon.data}
+              vote={() => voteForRounder(second)}
+            />
+            <div className="p-2"></div>
+          </>
+        )}
+        {!dataLoaded && <img src="/rings.svg" className="w-48" />}
       </div>
-      <div className="absolute bottom-5 w-full text-xl text-center">
+      <div className="w-full text-xl text-center pb-2">
         <a href="https://github.com/dgbaoquoc/roundest-mon">Github</a>
         {" | "}
         <Link href="/results">
-          <a href="Results"></a>
+          <a href="Results">Results</a>
         </Link>
       </div>
     </div>
@@ -89,7 +97,7 @@ const PokemonListing: React.FC<{
       <div className="text-xl text-center capitalize mt-[-2rem]">
         {props.pokemon.name}
       </div>
-      <button className="custom-btn" onClick={() => props.vote()}>
+      <button className="custom-btn mt-2" onClick={() => props.vote()}>
         Rounder
       </button>
     </div>
