@@ -4,6 +4,7 @@ import type { NextPage } from "next";
 import { useState } from "react";
 import { inferQueryResponse } from "./api/trpc/[trpc]";
 import Image from "next/image";
+import Link from "next/link";
 
 const Home: NextPage = () => {
   const [ids, updateIds] = useState(getOptionsForVote());
@@ -60,6 +61,10 @@ const Home: NextPage = () => {
       </div>
       <div className="absolute bottom-5 w-full text-xl text-center">
         <a href="https://github.com/dgbaoquoc/roundest-mon">Github</a>
+        {" | "}
+        <Link href="/results">
+          <a href="Results"></a>
+        </Link>
       </div>
     </div>
   );
