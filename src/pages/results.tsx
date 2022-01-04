@@ -1,8 +1,9 @@
-import { GetStaticProps } from "next";
 import { prisma } from "@/backend/utils/prisma";
 import { AsyncReturnType } from "@/backend/utils/ts-bs";
-import Image from "next/image";
+import { GetStaticProps } from "next";
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 
 const getPokemonInOrder = async () => {
   return await prisma.pokemon.findMany({
@@ -57,6 +58,11 @@ const ResultsPage: React.FC<{
       <Head>
         <title>Roundest Pokemon Results</title>
       </Head>
+      <div className="absolute left-5 top-5">
+        <button className="custom-btn">
+          <Link href="/">Back</Link>
+        </button>
+      </div>
       <h2 className="text-2xl p-4">Resutls</h2>
       <div className="flex flex-col w-full max-w-2xl border">
         {pokemon
@@ -76,15 +82,10 @@ const ResultsPage: React.FC<{
   );
 };
 
+export default ResultsPage;
+
 export const getStaticProps: GetStaticProps = async () => {
   const pokemonOrdered = await getPokemonInOrder();
-
-  return {
-    props: {
-      pokemon: pokemonOrdered,
-    },
-    revalidate: 60,
-  };
+  const DAY_IN_SECONDS = 60 * 60 * 24;
+  return { props: { pokemon: pokemonOrdered }, revalidate: DAY_IN_SECONDS };
 };
-
-export default ResultsPage;

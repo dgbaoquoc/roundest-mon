@@ -1,75 +1,71 @@
-import { getOptionsForVote } from "@/utils/getRandomPokemon";
 import { trpc } from "@/utils/trpc";
 import type { NextPage } from "next";
-import { useState } from "react";
-import { inferQueryResponse } from "./api/trpc/[trpc]";
+import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import Head from "next/head";
+import { inferQueryResponse } from "./api/trpc/[trpc]";
 
 const Home: NextPage = () => {
-  const [ids, updateIds] = useState(getOptionsForVote());
-  const [first, second] = ids;
-
-  const firstPokemon = trpc.useQuery([
-    "get-pokemon-by-id",
-    {
-      id: first,
-    },
-  ]);
-
-  const secondPokemon = trpc.useQuery([
-    "get-pokemon-by-id",
-    {
-      id: second,
-    },
-  ]);
+  const {
+    data: pokemonPair,
+    refetch,
+    isLoading,
+  } = trpc.useQuery(["get-pokemon-pair"], {
+    refetchInterval: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+  });
 
   const voteMutation = trpc.useMutation(["cast-vote"]);
 
   const voteForRounder = (selected: number) => {
-    if (selected === first) {
-      voteMutation.mutate({ votedFor: first, votedAgainst: second });
+    if (!pokemonPair) return;
+
+    if (selected === pokemonPair?.firstPokemon.id) {
+      voteMutation.mutate({
+        votedFor: pokemonPair.firstPokemon.id,
+        votedAgainst: pokemonPair.secondPokemon.id,
+      });
     } else {
-      voteMutation.mutate({ votedFor: second, votedAgainst: first });
+      voteMutation.mutate({
+        votedFor: pokemonPair.secondPokemon.id,
+        votedAgainst: pokemonPair.firstPokemon.id,
+      });
     }
 
-    updateIds(getOptionsForVote());
+    refetch();
   };
 
-  const dataLoaded =
-    !firstPokemon.isLoading &&
-    firstPokemon.data &&
-    !secondPokemon.isLoading &&
-    secondPokemon.data;
+  const fetchingNext = voteMutation.isLoading || isLoading;
 
   return (
-    <div className="h-screen w-screen flex flex-col justify-between items-center relative">
+    <div className="h-screen w-screen flex flex-col justify-between items-center relative overflow-hidden">
       <Head>
         <title>Roundest Pokemon</title>
       </Head>
       <div className="text-2xl text-center pt-8">Which Pokemon is Rounder?</div>
-      <div className="p-2" />
       <div className="p-8 flex justify-between items-center max-w-2xl flex-col md:flex-row animate-fade-in">
-        {dataLoaded && (
+        {pokemonPair && (
           <>
             <PokemonListing
-              pokemon={firstPokemon.data}
-              vote={() => voteForRounder(first)}
+              pokemon={pokemonPair.firstPokemon}
+              vote={() => voteForRounder(pokemonPair.firstPokemon.id)}
+              disabled={fetchingNext}
             />
             <div className="p-8 italic text-xl">{"or"}</div>
             <PokemonListing
-              pokemon={secondPokemon.data}
-              vote={() => voteForRounder(second)}
+              pokemon={pokemonPair.secondPokemon}
+              vote={() => voteForRounder(pokemonPair.secondPokemon.id)}
+              disabled={fetchingNext}
             />
             <div className="p-2"></div>
           </>
         )}
-        {!dataLoaded && <img src="/rings.svg" className="w-48" />}
+        {!pokemonPair && <img src="/rings.svg" className="w-48" />}
       </div>
       <div className="w-full text-xl text-center pb-2">
         <a href="https://github.com/dgbaoquoc/roundest-mon">Github</a>
-        {" | "}
+        <span className="p-4">{"-"}</span>
         <Link href="/results">
           <a href="Results">Results</a>
         </Link>
@@ -78,26 +74,35 @@ const Home: NextPage = () => {
   );
 };
 
-type PokemonFromServer = inferQueryResponse<"get-pokemon-by-id">;
-type PokemonListingProps = {};
+type PokemonFromServer = inferQueryResponse<"get-pokemon-pair">["firstPokemon"];
 
 const PokemonListing: React.FC<{
   pokemon: PokemonFromServer;
   vote: () => void;
+  disabled: boolean;
 }> = (props) => {
   return (
-    <div className="flex flex-col items-center">
+    <div
+      className={`flex flex-col items-center transition-opacity ${
+        props.disabled && "opacity-0"
+      }`}
+      key={props.pokemon.id}
+    >
+      <div className="text-xl text-center capitalize mt-[-0.5rem]">
+        {props.pokemon.name}
+      </div>
       <Image
         src={props.pokemon.spriteUrl}
         width={256}
         height={256}
-        className="w-64 h-64"
         layout="fixed"
+        className="animate-fade-in"
       />
-      <div className="text-xl text-center capitalize mt-[-2rem]">
-        {props.pokemon.name}
-      </div>
-      <button className="custom-btn mt-2" onClick={() => props.vote()}>
+      <button
+        className="custom-btn"
+        onClick={() => props.vote()}
+        disabled={props.disabled}
+      >
         Rounder
       </button>
     </div>
